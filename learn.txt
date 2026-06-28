@@ -1,0 +1,14 @@
+venv(Virtual Environment)
+
+without venv, all projects use same packages, version conflict 
+will occur
+
+pip install flask sqlalchemy PyPDF2 pymysql openai python-docx
+
+1.Setup
+2.Database Connection
+
+TiDB URL:- mysql+mysqldb://2N3JjeTTyhJwnL4.root:03vtmdN3SuDR64qe@gateway01.ap-southeast-1.prod.alicloud.tidbcloud.com:4000/test?ssl_mode=VERIFY_IDENTITY&ssl_ca=<CA_PATH>
+TiDB Password=03vtmdN3SuDR64qe33
+
+SARVAM_API_KEY= "sk_02zmq39g_rNZWCxqYPwUSu8nPQiOIWg4Z"
