@@ -1,4 +1,6 @@
 flask
-# Add any other libraries your app uses, for example:
+SQLAlchemy
+# Add other dependencies your app uses in ai.py or app.py, such as:
 # google-generativeai
 # python-dotenv
+# requests
