@@ -1,0 +1,4 @@
+flask
+# Add any other libraries your app uses, for example:
+# google-generativeai
+# python-dotenv
