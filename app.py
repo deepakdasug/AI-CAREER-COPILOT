@@ -193,9 +193,10 @@ def history():
             "linkedin": linkedin.group(0) if linkedin else "Not Available",
             "resume": resume,
             "result": parsed_results
-        })        
-        db.close()
-        return render_template("history.html", reports=parsed_reports)
+        })
+    
+    db.close()
+    return render_template("history.html", reports=parsed_reports)
 
 
 # Logout

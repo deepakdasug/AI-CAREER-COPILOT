@@ -5,4 +5,4 @@ pymysql
 PyPDF2
 python-docx
 python-dotenv
-sarvam-ai
+sarvamai

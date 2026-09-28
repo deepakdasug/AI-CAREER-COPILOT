@@ -51,11 +51,11 @@ Resume to analyze:
     try:
         # Call Sarvam AI Chat Completion API
         response = client.chat.completions(
-            model="sarvam-30b",
+            model="sarvam-105b",
             temperature=0.1,  # Lowered temperature makes output more deterministic/adherent to rules
             messages=[
                 {
-                    "role": "system", 
+                    "role": "system",
                     "content": "You are a strict technical hiring manager. You only communicate using valid, raw JSON objects matching the user's requested schema. Never output markdown block markers or friendly chat."
                 },
                 {"role": "user", "content": prompt}
@@ -63,7 +63,14 @@ Resume to analyze:
         )
 
         # Retrieve string content from Sarvam response payload
-        content = response.choices[0].message.content.strip()
+        if not response.choices or len(response.choices) == 0:
+            raise ValueError("No response choices returned from AI model")
+        
+        message = response.choices[0].message
+        if not message or not message.content:
+            raise ValueError("No message content in AI response")
+            
+        content = message.content.strip()
 
         # Clean off markdown syntax backticks if the model ignores system rules
         if content.startswith("```"):
