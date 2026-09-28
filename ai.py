@@ -6,16 +6,6 @@ from sarvamai import SarvamAI
 # 1. Load environment variables from the local .env file securely
 load_dotenv()
 
-# 2. Verify the environment variable is loaded before initializing the client
-api_key = os.environ.get("SARVAM_API_KEY")
-
-if not api_key:
-    raise ValueError("CRITICAL ERROR: SARVAM_API_KEY not found. Please check your .env file setup.")
-
-# 3. Pass the loaded key directly into the SarvamAI client constructor
-client = SarvamAI(api_subscription_key=api_key)
-
-
 def analyze_resume(resume_text, user_goal):
     """
     Analyzes a given resume text using Sarvam AI based on a specified user career goal.
@@ -49,10 +39,19 @@ Resume to analyze:
 {resume_text}
 """
     try:
+        api_key = os.environ.get("SARVAM_API_KEY")
+        if not api_key:
+            raise ValueError("SARVAM_API_KEY is not configured")
+
+        client = SarvamAI(api_subscription_key=api_key)
+
         # Call Sarvam AI Chat Completion API
         response = client.chat.completions(
             model="sarvam-105b",
             temperature=0.1,  # Lowered temperature makes output more deterministic/adherent to rules
+            reasoning_effort="low",
+            max_tokens=4000,
+            response_format={"type": "json_object"},
             messages=[
                 {
                     "role": "system",
@@ -87,10 +86,16 @@ Resume to analyze:
         end = content.rfind("}") + 1
         
         if start == -1 or end == 0:
-            raise ValueError(f"The AI model did not return a valid JSON block. Raw Response: {content}")
+            raise ValueError("The AI model did not return a valid JSON object")
 
         # Parse the extracted string block into a native Python dictionary
-        return json.loads(content[start:end])
+        result = json.loads(content[start:end])
+        required_fields = ("skills", "missing_skills", "roadmap", "interview_questions")
+        if not isinstance(result, dict) or any(
+            not isinstance(result.get(field), list) for field in required_fields
+        ):
+            raise ValueError("The AI model returned an incomplete analysis")
+        return result
         
     except Exception as e:
         # Fallback dictionary tracking the error exception safely

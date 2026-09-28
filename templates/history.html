@@ -1,108 +1,35 @@
 {% extends "base.html" %}
+{% block title %}History | Career Copilot{% endblock %}
 
 {% block content %}
-
-<h2>Resume Analysis History</h2>
-
-{% if reports %}
-
-    {% for report in reports %}
-
-    <div class="red">
-
-        <h3>📄 Resume Details</h3>
-
-        <div class="resume-info">
-
-            <div class="info-item">
-                <strong>📍 Address</strong>
-                <p>{{ report.address }}</p>
+<div class="history-page">
+    <section class="history-heading"><div><p class="eyebrow"><span class="eyebrow-line"></span> YOUR CAREER ARCHIVE</p><h1>Past work.<br><em>Future clarity.</em></h1><p class="workspace-lede">Your previous resume readouts, all in one place.</p></div><div class="history-total"><strong>{{ reports|length }}</strong><span>saved<br>analysis{% if reports|length != 1 %}es{% endif %}</span></div></section>
+    {% if reports %}
+    <div class="history-toolbar"><label for="history-search">Find an analysis</label><div class="history-search-wrap"><span aria-hidden="true">⌕</span><input id="history-search" type="search" placeholder="Search resume text or email" autocomplete="off" data-history-search></div><p data-history-count>{{ reports|length }} result{% if reports|length != 1 %}s{% endif %}</p></div>
+    <div class="history-list" data-history-list>
+        {% for report in reports %}
+        <article class="history-report" data-history-item data-search="{{ (report.resume ~ ' ' ~ report.email ~ ' ' ~ report.linkedin)|lower|e }}">
+            <div class="history-report-top"><span class="history-report-index">ANALYSIS / {{ '%02d'|format(loop.index) }}</span><span class="history-role">Career profile</span></div>
+            <div class="history-report-grid">
+                <div class="history-resume">
+                    <h2>Resume details</h2>
+                    <dl class="resume-details"><div><dt>Email</dt><dd>{{ report.email }}</dd></div><div><dt>Phone</dt><dd>{{ report.phone }}</dd></div><div><dt>LinkedIn</dt><dd>{{ report.linkedin }}</dd></div>{% if report.address %}<div><dt>Location</dt><dd>{{ report.address }}</dd></div>{% endif %}</dl>
+                    {% set preview = ('Top Skills' + report.resume.split('Top Skills', 1)[1]) if 'Top Skills' in report.resume else report.resume %}
+                    <details class="resume-disclosure"><summary>View original resume <span aria-hidden="true">↗</span></summary><pre class="resume-text">{{ preview }}</pre></details>
+                </div>
+                <div class="history-readout">
+                    <section><h3><span>01</span> Identified strengths</h3><ul class="history-tags">{% for skill in report.result.get("skills", []) %}<li>{{ skill }}</li>{% else %}<li class="muted-item">No skills found.</li>{% endfor %}</ul></section>
+                    <section><h3><span>02</span> Skills to build</h3><ul class="history-lines">{% for skill in report.result.get("missing_skills", []) %}<li>{{ skill }}</li>{% else %}<li class="muted-item">No missing skills.</li>{% endfor %}</ul></section>
+                    <section><h3><span>03</span> Learning roadmap</h3><ol class="history-lines">{% for item in report.result.get("roadmap", []) %}<li>{{ item }}</li>{% else %}<li class="muted-item">No roadmap generated.</li>{% endfor %}</ol></section>
+                    <section><h3><span>04</span> Interview practice</h3><ol class="history-lines">{% for question in report.result.get("interview_questions", []) %}<li>{{ question }}</li>{% else %}<li class="muted-item">No interview questions available.</li>{% endfor %}</ol></section>
+                </div>
             </div>
-
-            <div class="info-item">
-                <strong>📞 Phone</strong>
-                <p>{{ report.phone }}</p>
-            </div>
-
-            <div class="info-item">
-                <strong>📧 Email</strong>
-                <p>{{ report.email }}</p>
-            </div>
-
-            <div class="info-item">
-                <strong>🔗 LinkedIn</strong>
-                <p>{{ report.linkedin }}</p>
-            </div>
-
-        </div>
-
-        
-
-        <pre class="resume-text">
-{% set preview = ('Top Skills' + report.resume.split('Top Skills', 1)[1]) if 'Top Skills' in report.resume else report.resume %}
-
-<pre class="resume-text">
-{{ preview
-    | replace('Top Skills', '\n━━━━━━━━━━━━━━━━━━━━━━\n🛠 TOP SKILLS\n━━━━━━━━━━━━━━━━━━━━━━')
-    | replace('Certifications', '\n\n━━━━━━━━━━━━━━━━━━━━━━\n🏆 CERTIFICATIONS\n━━━━━━━━━━━━━━━━━━━━━━')
-    | replace('Summary', '\n\n━━━━━━━━━━━━━━━━━━━━━━\n📝 SUMMARY\n━━━━━━━━━━━━━━━━━━━━━━')
-}}
-</pre>
-        </pre>
-
-        <h3>🛠 Skills Identified</h3>
-
-        <ul>
-            {% for skill in report.result.get("skills", []) %}
-                <li>{{ skill }}</li>
-            {% else %}
-                <li>No skills found.</li>
-            {% endfor %}
-        </ul>
-
-        <h3>❌ Missing Skills</h3>
-
-        <ul>
-            {% for skill in report.result.get("missing_skills", []) %}
-                <li>{{ skill }}</li>
-            {% else %}
-                <li>No missing skills.</li>
-            {% endfor %}
-        </ul>
-
-        <h3>🗺 Learning Roadmap</h3>
-
-        <ul>
-            {% for item in report.result.get("roadmap", []) %}
-                <li>{{ item }}</li>
-            {% else %}
-                <li>No roadmap generated.</li>
-            {% endfor %}
-        </ul>
-
-        <h3>🎯 Interview Questions</h3>
-
-        <ul>
-            {% for question in report.result.get("interview_questions", []) %}
-                <li>{{ question }}</li>
-            {% else %}
-                <li>No interview questions available.</li>
-            {% endfor %}
-        </ul>
-
+        </article>
+        {% endfor %}
     </div>
-
-    <br><br>
-
-    {% endfor %}
-
-{% else %}
-
-<div class="card">
-    <h3>No Analysis History Found</h3>
-    <p>You haven't analyzed any resumes yet.</p>
+    <div class="history-empty-filter" data-history-empty hidden>No analyses match that search.</div>
+    {% else %}
+    <section class="history-empty"><span aria-hidden="true">↗</span><h2>Your archive starts with one clear look.</h2><p>Run an analysis from your workspace and it will appear here.</p><a class="button-primary" href="{{ url_for('dashboard') }}">Go to workspace <span aria-hidden="true">↗</span></a></section>
+    {% endif %}
 </div>
-
-{% endif %}
-
 {% endblock %}

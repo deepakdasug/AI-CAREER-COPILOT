@@ -1,55 +1,57 @@
 {% extends "base.html" %}
+{% block title %}Workspace | Career Copilot{% endblock %}
 {% block content %}
+<div class="workspace-page">
+    <section class="workspace-heading">
+        <div><p class="eyebrow"><span class="eyebrow-line"></span> YOUR CAREER WORKSPACE</p><h1>Good to see you, <em>{{ user_name }}.</em></h1><p class="workspace-lede">Start with your experience. Leave with a direction.</p></div>
+        <div class="workspace-index"><span>ANALYSIS</span><strong>01</strong></div>
+    </section>
+    <section class="analysis-workspace" aria-labelledby="analysis-title">
+        <div class="analysis-heading"><div><span class="section-kicker">01 / CAREER FIT</span><h2 id="analysis-title">Build your next move</h2></div><span class="analysis-spark" aria-hidden="true">✳</span></div>
+        <form id="analysis-form" class="analysis-form" method="POST" enctype="multipart/form-data">
+            <fieldset class="resume-source">
+                <legend>Your resume</legend>
+                <div class="source-switch" role="tablist" aria-label="Choose resume input method">
+                    <button class="source-tab is-active" type="button" role="tab" aria-selected="true" aria-controls="paste-panel" data-source-tab="paste">Paste text</button>
+                    <button class="source-tab" type="button" role="tab" aria-selected="false" aria-controls="upload-panel" data-source-tab="upload">Upload a file</button>
+                </div>
+                <div class="source-panel" id="paste-panel" role="tabpanel" data-source-panel="paste">
+                    <label class="visually-hidden" for="resume-text">Resume text</label>
+                    <textarea id="resume-text" name="resume" placeholder="Paste your resume here. Include experience, skills, and education for a more useful analysis." data-paste-input></textarea>
+                    <div class="field-foot"><span>Keep personal contact details out if you prefer.</span><span data-character-count>0 characters</span></div>
+                </div>
+                <div class="source-panel is-hidden" id="upload-panel" role="tabpanel" data-source-panel="upload" hidden>
+                    <input class="file-input" id="resume-file" type="file" name="file" accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" data-file-input>
+                    <label class="upload-zone" for="resume-file" data-upload-zone>
+                        <span class="upload-symbol" aria-hidden="true">↑</span>
+                        <span class="upload-copy"><strong data-file-name>Choose a resume file</strong><small>PDF or DOCX · Click to browse or drop it here</small></span>
+                        <span class="upload-browse">Browse</span>
+                    </label>
+                </div>
+            </fieldset>
+            <div class="goal-field">
+                <label for="career-goal"><span class="section-kicker">02 / YOUR DIRECTION</span><strong>What role are you moving toward?</strong></label>
+                <input id="career-goal" name="role" placeholder="e.g. Product designer, Backend engineer" required>
+            </div>
+            <div class="analysis-submit-row"><p>Your analysis is saved to your private history.</p><button class="analyze-button" type="submit"><span data-submit-label>Analyze my fit</span><span aria-hidden="true">↗</span></button></div>
+        </form>
+    </section>
 
-<h2>Welcome, {{ user_name }}</h2>
-<div class="card">
-    <h3>Resume Analyser</h3>
-    
-    <form method="POST" enctype="multipart/form-data">
-        <textarea name="resume" placeholder="Paste your resume (optional)"></textarea>
-        <p>OR upload resume file:</p>
-        <input type="file" name="file">
-        <input name="role" placeholder="What do you want to become? (e.g. Backend Engineer)" required>
-        <button type="submit">Analyse</button>
-    </form>
-</div>
-
-{% if result %}
-<div class="red">
-    
-    {% if result.error %}
-        <p style="color: red;">Error: {{ result.error }}</p>
+    {% if result %}
+    <section class="analysis-results" id="analysis-results" aria-labelledby="results-title">
+        <div class="results-heading"><div><p class="eyebrow"><span class="eyebrow-line"></span> YOUR READOUT</p><h2 id="results-title">Where you stand<span class="title-period">.</span></h2></div><a href="#analysis-title" class="results-again">Run another <span aria-hidden="true">↗</span></a></div>
+        {% if result.error %}
+        <div class="result-error" role="alert"><span aria-hidden="true">!</span><div><strong>We couldn’t finish that analysis.</strong><p>{{ result.error }}</p></div></div>
+        {% else %}
+        <nav class="results-nav" aria-label="Analysis sections"><a href="#result-skills">Strengths</a><a href="#result-gaps">Skill gaps</a><a href="#result-roadmap">Roadmap</a><a href="#result-questions">Interview prep</a></nav>
+        <div class="results-grid">
+            <section class="result-block result-strengths" id="result-skills"><div class="result-label"><span>01</span><h3>Strengths</h3></div><ul>{% for s in result.get("skills", []) %}<li>{{ s }}</li>{% else %}<li class="empty-result">No matching skills found yet.</li>{% endfor %}</ul></section>
+            <section class="result-block result-gaps" id="result-gaps"><div class="result-label"><span>02</span><h3>Skills to build</h3></div><ul>{% for s in result.get("missing_skills", []) %}<li>{{ s }}</li>{% else %}<li class="empty-result">No gaps identified.</li>{% endfor %}</ul></section>
+            <section class="result-block result-roadmap" id="result-roadmap"><div class="result-label"><span>03</span><h3>Your roadmap</h3></div><ol>{% for s in result.get("roadmap", []) %}<li>{{ s }}</li>{% else %}<li class="empty-result">No roadmap generated.</li>{% endfor %}</ol></section>
+            <section class="result-block result-questions" id="result-questions"><div class="result-label"><span>04</span><h3>Interview practice</h3></div><ol>{% for s in result.get("interview_questions", []) %}<li>{{ s }}</li>{% else %}<li class="empty-result">No questions generated.</li>{% endfor %}</ol></section>
+        </div>
+        {% endif %}
+    </section>
     {% endif %}
-    
-    <h3>Skills</h3>
-    <ul>
-        {% for s in result.get("skills", []) %}
-        <li>{{ s }}</li>
-        {% endfor %}
-    </ul>
-
-    <h3>Missing Skills</h3>
-    <ul>
-        {% for s in result.get("missing_skills", []) %}
-        <li>{{ s }}</li>
-        {% endfor %}
-    </ul>
-
-    <h3>Roadmap</h3>
-    <ul>
-        {% for s in result.get("roadmap", []) %}
-        <li>{{ s }}</li>
-        {% endfor %}
-    </ul>
-    
-    <h3>Interview Questions List</h3>
-    <ul>
-        {% for s in result.get("interview_questions", []) %}
-        <li>{{ s }}</li>
-        {% endfor %}
-    </ul>
-
 </div>
-{% endif %}
-
 {% endblock %}

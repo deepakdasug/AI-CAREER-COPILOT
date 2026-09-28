@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Career Copilot | Make your next move{% endblock %}
+
+{% block content %}
+<div class="home-page">
+    <section class="home-hero">
+        <div class="hero-copy reveal-in">
+            <p class="eyebrow"><span class="eyebrow-line"></span> YOUR CAREER, IN FOCUS</p>
+            <h1 class="hero-title">AI Career<br><em>Copilot.</em></h1>
+            <p class="hero-subtitle">Make your next move make sense.</p>
+            <p class="hero-description">Turn the experience you already have into a clear, practical plan for the role you want next.</p>
+            <div class="hero-buttons">
+                <a href="{{ url_for('signup') }}" class="button-primary">Start with your resume <span aria-hidden="true">↗</span></a>
+                <a href="{{ url_for('login') }}" class="button-quiet">I already have an account</a>
+            </div>
+            <div class="hero-footnote"><span class="status-dot"></span> Private workspace · Your resume stays yours</div>
+        </div>
+        <div class="hero-visual reveal-in" aria-label="A team planning their next project">
+            <img src="https://images.unsplash.com/photo-1521737711867-e3b97375f902?auto=format&fit=crop&w=1200&q=85" alt="Colleagues working together around a table" fetchpriority="high">
+            <div class="visual-index"><span>01</span><span>CAREER, REFRAMED</span></div>
+            <div class="visual-stamp" aria-hidden="true"><span>YOUR NEXT</span><strong>CHAPTER</strong><i>↗</i></div>
+            <div class="visual-caption"><span class="caption-rule"></span> SEE THE SKILLS YOU HAVE. FIND THE ONES THAT MOVE YOU FORWARD.</div>
+        </div>
+        <div class="hero-scroll" aria-hidden="true"><span></span> SCROLL TO EXPLORE</div>
+    </section>
+
+    <section class="home-method" aria-labelledby="method-title">
+        <div class="section-lead">
+            <p class="eyebrow"><span class="eyebrow-line"></span> A CLEARER WAY FORWARD</p>
+            <h2 id="method-title">From where you are<br>to where you <em>want to be.</em></h2>
+        </div>
+        <div class="method-list">
+            <article class="method-step"><span class="method-number">01</span><div><h3>Bring your story</h3><p>Paste your resume or upload a PDF or DOCX.</p></div><span class="method-arrow">↘</span></article>
+            <article class="method-step"><span class="method-number">02</span><div><h3>Name the next role</h3><p>Choose the direction you want your experience to take.</p></div><span class="method-arrow">↘</span></article>
+            <article class="method-step"><span class="method-number">03</span><div><h3>Leave with a plan</h3><p>See relevant strengths, skill gaps, and next steps.</p></div><span class="method-arrow">↗</span></article>
+        </div>
+    </section>
+
+    <section class="home-outro">
+        <p class="eyebrow"><span class="eyebrow-line"></span> THE NEXT STEP IS YOURS</p>
+        <div class="outro-row"><h2>Make a move<br>with <em>momentum.</em></h2><a href="{{ url_for('signup') }}" class="round-link" aria-label="Create your account">↗</a></div>
+    </section>
+</div>
+{% endblock %}

@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, redirect, session
 from db import engine, Base, SessionLocal
+from werkzeug.security import check_password_hash, generate_password_hash
 import PyPDF2
 import docx
 import json
@@ -13,6 +14,9 @@ load_dotenv()
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'dev-secret-key-change-in-production')
+app.config['SESSION_PERMANENT'] = False
+app.config['SESSION_COOKIE_HTTPONLY'] = True
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 
 # Create tables cleanly within the application context so it doesn't loop pointlessly
 with app.app_context():
@@ -26,27 +30,28 @@ with app.app_context():
 def home():
     if 'user' in session:
         return redirect('/dashboard')
-    return redirect('/login')
+    return render_template('home.html')
 
 
 # Signup
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
-    db = SessionLocal()
     if request.method == 'POST':
-        name=request.form.get("name")
-        email = request.form.get('email')
-        password = request.form.get('password')
+        name = (request.form.get("name") or "").strip()
+        email = (request.form.get('email') or "").strip().lower()
+        password = request.form.get('password') or ""
 
-        existing_user = db.query(models.User).filter_by(email=email).first()
-        if existing_user:
-            return 'User already exists'
-        
-        user = models.User(name=name,email=email, password=password)
-        db.add(user)
-        db.commit()
-        db.close() # Close session when done
+        if not name or not email or len(password) < 6:
+            return render_template('signup.html', error='Enter your name and email, and use a password with at least 6 characters.'), 400
 
+        with SessionLocal() as db:
+            existing_user = db.query(models.User).filter_by(email=email).first()
+            if existing_user:
+                return render_template('signup.html', error='An account with that email already exists.'), 409
+
+            user = models.User(name=name, email=email, password=generate_password_hash(password))
+            db.add(user)
+            db.commit()
         return redirect('/login')
     return render_template('signup.html')
 
@@ -54,23 +59,26 @@ def signup():
 # Login
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    db = SessionLocal()
     if request.method == 'POST':
-        name=request.form.get('name')
-        email = request.form.get('email')
-        password = request.form.get('password')
+        email = (request.form.get('email') or "").strip().lower()
+        password = request.form.get('password') or ""
 
-        user = db.query(models.User).filter_by(name=name,email=email, password=password).first()
-        user_name = user.name if user else "Guest"
-        if user:
-            session['user'] = user.email
-            session['user_name']=user_name
-            
-            db.close()
-            return redirect('/dashboard')
-        else:
-            db.close()
-            return 'Invalid credentials'
+        with SessionLocal() as db:
+            user = db.query(models.User).filter_by(email=email).first()
+            stored_password = user.password or "" if user else ""
+            is_hashed = stored_password.startswith(('scrypt:', 'pbkdf2:'))
+            password_matches = (
+                check_password_hash(stored_password, password)
+                if user and is_hashed
+                else bool(user and stored_password == password)
+            )
+
+            if password_matches:
+                session['user'] = user.email
+                session['user_name'] = user.name
+                return redirect('/dashboard')
+
+        return render_template('login.html', error='Invalid credentials')
     return render_template('login.html')
 
 
@@ -111,28 +119,30 @@ def dashboard():
                 except Exception as e:
                     result = {"error": f"Docx error: {str(e)}"}
 
-        if resume_text and user_goal:
-            
+        if resume_text and user_goal and not (result and result.get("error")):
+
             try:
                 result = ai.analyze_resume(resume_text, user_goal)
-                
-                # Save to database
-                db = SessionLocal()
-                user = db.query(models.User).filter_by(email=session["user"]).first()
-                
-                report = models.Reports(
-                    user_id = user.id,
-                    resume_text = resume_text,
-                    result = json.dumps(result) # Changed from r.results to match column name 'result' in models.py
-                )
 
-                db.add(report)
-                db.commit()
-                db.close()
+                if not result.get('error'):
+                    with SessionLocal() as db:
+                        user = db.query(models.User).filter_by(email=session["user"]).first()
+                        if not user:
+                            session.clear()
+                            return redirect('/login')
+
+                        report = models.Reports(
+                            user_id=user.id,
+                            resume_text=resume_text,
+                            result=json.dumps(result)
+                        )
+                        db.add(report)
+                        db.commit()
 
             except Exception as e:
                 result = {"error": f"AI error: {str(e)}"}
-            print(resume_text)
+        elif not result:
+            result = {"error": "Provide resume text or upload a PDF/DOCX file and enter a career goal."}
 
     return render_template(
         "dashboard.html",
@@ -148,14 +158,17 @@ def dashboard():
 def history():
     if "user" not in session:
         return redirect("/login")
-        
-    db = SessionLocal()
-    user = db.query(models.User).filter_by(email=session["user"]).first()
+
+    with SessionLocal() as db:
+        user = db.query(models.User).filter_by(email=session["user"]).first()
+        if not user:
+            session.clear()
+            return redirect('/login')
+
+        reports = db.query(models.Reports).filter_by(user_id=user.id).all()
 
     # Fixed: Changed models.Report -> models.Reports to match your model class
     import re
-
-    reports = db.query(models.Reports).filter_by(user_id=user.id).all()
 
     parsed_reports = []
 
@@ -165,7 +178,7 @@ def history():
         except Exception:
             parsed_results = {}
 
-        resume = r.resume_text
+        resume = r.resume_text or ""
 
         # Clean common PDF issues
         resume = resume.replace(".c\nom", ".com")
@@ -195,7 +208,6 @@ def history():
             "result": parsed_results
         })
     
-    db.close()
     return render_template("history.html", reports=parsed_reports)
 
 

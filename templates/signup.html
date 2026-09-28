@@ -1,19 +1,32 @@
 {% extends "base.html" %}
+{% block title %}Create account | Career Copilot{% endblock %}
 {% block content %}
-<div class="auth-container">
-    <div class="auth-card">
-        <h2>Create Account</h2>
-        <p class="sub-text">
-            Start your AI Career Journey
-        </p>
-        <form method="post">
-            <input type="name" name="name" placeholder="Enter your full name:" required>
-            <input type="email" name="email" placeholder="Enter your email" required>
-            <input type="password" name="password" placeholder="Create a password">
-            <p class="sub-text">Use atleast 6 characters</p>
-            <button type="submit">Sign up</button>
-        </form>
-        <p class="switch-auth">Already have an account? <a href="/login">Login</a></p>
+<section class="auth-layout auth-signup">
+    <aside class="auth-art">
+        <div class="auth-art-top"><span class="art-mark">C</span><span>CAREER COPILOT / 02</span></div>
+        <div class="auth-art-copy"><p class="eyebrow">A NEW CHAPTER STARTS HERE</p><h1>Give your ambition<br>a <em>direction.</em></h1><p>Make space for a plan that connects your experience to what comes next.</p></div>
+        <div class="auth-art-bottom"><span>YOUR STORY. YOUR NEXT STEP.</span><span>↗</span></div>
+    </aside>
+    <div class="auth-main">
+        <div class="auth-card">
+            <p class="eyebrow"><span class="eyebrow-line"></span> START YOUR WORKSPACE</p>
+            <h2>Create account</h2>
+            <p class="auth-intro">A little about you, then you’re on your way.</p>
+            {% if error %}<div class="error-message" role="alert">{{ error }}</div>{% endif %}
+            <form method="post" class="auth-form">
+                <label for="signup-name">Full name</label>
+                <input id="signup-name" type="text" name="name" placeholder="Your name" autocomplete="name" required>
+                <label for="signup-email">Email address</label>
+                <input id="signup-email" type="email" name="email" placeholder="you@example.com" autocomplete="email" required>
+                <label for="signup-password">Create a password</label>
+                <div class="password-field">
+                    <input id="signup-password" type="password" name="password" placeholder="At least 6 characters" autocomplete="new-password" minlength="6" required>
+                    <button class="password-toggle" type="button" aria-controls="signup-password" aria-label="Show password" aria-pressed="false" data-password-toggle>Show</button>
+                </div>
+                <button class="auth-submit" type="submit">Create account <span aria-hidden="true">↗</span></button>
+            </form>
+            <p class="switch-auth">Already have a workspace? <a href="{{ url_for('login') }}">Sign in <span aria-hidden="true">↗</span></a></p>
+        </div>
     </div>
-</div>
+</section>
 {% endblock %}

@@ -7,7 +7,7 @@ class User(Base):
     name=Column(String(100))
     id=Column(Integer,primary_key=True)
     email=Column(String(100),unique=True)
-    password=Column(String(100))
+    password=Column(String(255))
 
 class Reports(Base):
     __tablename__='reports'
