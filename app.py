@@ -3,11 +3,16 @@ from db import engine, Base, SessionLocal
 import PyPDF2
 import docx
 import json
+import os
+from dotenv import load_dotenv
 import models  # Important for SQLAlchemy to know what tables to build!
 import ai
 
+# Load environment variables
+load_dotenv()
+
 app = Flask(__name__)
-app.secret_key = 'secret123'
+app.secret_key = os.environ.get('SECRET_KEY', 'dev-secret-key-change-in-production')
 
 # Create tables cleanly within the application context so it doesn't loop pointlessly
 with app.app_context():
