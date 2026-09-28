@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<div class="auth-container">
+    <div class="auth-card">
+        
+    <p class="sub-text">
+        Login to access your account
+    </p>
+
+    <form method="POST">
+        <input type="name" name="name" placeholder="Enter your full name:" required>
+        <input type="email" name="email" placeholder="Enter your email" required>
+            <input type="password" name="password" placeholder="Enter your password">
+            <button type="submit">Login</button>
+    </form>
+    <div class="auth-links">
+        <a href="#">Forgot Password?</a>
+    </div>
+    <p class="switch-auth">Don't have an account? <a href="/signup">Sign up</a></p>
+    </div>
+</div>
+
+
+
+{% endblock %}

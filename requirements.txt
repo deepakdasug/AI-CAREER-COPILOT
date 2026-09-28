@@ -1,0 +1,8 @@
+flask
+SQLAlchemy
+gunicorn
+pymysql
+PyPDF2
+python-docx
+python-dotenv
+sarvam-ai
