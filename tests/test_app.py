@@ -12,7 +12,7 @@ from werkzeug.security import check_password_hash
 
 import app as application
 import models
-from db import Base, SessionLocal, engine
+from db import Base, SessionLocal, engine, normalize_database_url
 
 
 def make_text_pdf():
@@ -58,6 +58,16 @@ class CareerCopilotAppTests(unittest.TestCase):
             "/login", data={"email": "test@example.com", "password": "secret1"}
         )
         self.assertEqual(response.status_code, 302)
+
+    def test_mysql_urls_select_installed_pymysql_driver(self):
+        for driver in ("mysql", "mysql+mysqldb", "mysql+pymysql"):
+            with self.subTest(driver=driver):
+                url = normalize_database_url(
+                    f"{driver}://user:password@db.example.com:4000/career"
+                )
+                self.assertEqual(url.drivername, "mysql+pymysql")
+                self.assertEqual(url.host, "db.example.com")
+                self.assertEqual(url.database, "career")
 
     def test_public_and_protected_routes(self):
         for path in ("/", "/login", "/signup"):
